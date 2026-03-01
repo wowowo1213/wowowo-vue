@@ -3,9 +3,9 @@ import { activeEffect, trackEffect, triggerEffects } from "./effect";
 import { createDep } from "./reactiveEffect";
 
 class RefImpl {
-  public __v_isRef = true; // 增加ref标识
-  public _value; // 用来保存ref的值
-  public dep; // 用来收集对应的dep
+  public __v_isRef = true;
+  public _value;
+  public dep;
   constructor(public rawValue) {
     this._value = toReactive(rawValue);
   }
@@ -43,7 +43,7 @@ function triggerRefValue(ref) {
 }
 
 class ObjectRefImpl {
-  public __v_isRef = true; // 增加ref标识
+  public __v_isRef = true;
   constructor(
     public _object,
     public _key,
@@ -70,8 +70,6 @@ export function toRefs(object) {
   return res;
 }
 
-// 这边就是为什么<tamplate>中ref不用调用value，因为自动解包了
-// 黄金考点(*^_^*)
 export function proxyRefs(objectWithRef) {
   return new Proxy(objectWithRef, {
     get(target, key, receiver) {
@@ -80,7 +78,6 @@ export function proxyRefs(objectWithRef) {
     },
     set(target, key, value, receiver) {
       const oldValue = target[key];
-      // if (oldValue === value) return; 这个会有问题么??
       if (oldValue.__v_isRef) {
         oldValue.value = value;
         return true;
