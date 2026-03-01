@@ -69,3 +69,24 @@ export function toRefs(object) {
   }
   return res;
 }
+
+// 这边就是为什么<tamplate>中ref不用调用value，因为自动解包了
+// 黄金考点(*^_^*)
+export function proxyRefs(objectWithRef) {
+  return new Proxy(objectWithRef, {
+    get(target, key, receiver) {
+      const r = Reflect.get(target, key, receiver);
+      return r.__v_isRef ? r.value : r;
+    },
+    set(target, key, value, receiver) {
+      const oldValue = target[key];
+      // if (oldValue === value) return; 这个会有问题么??
+      if (oldValue.__v_isRef) {
+        oldValue.value = value;
+        return true;
+      } else {
+        return Reflect.set(target, key, value, receiver);
+      }
+    },
+  });
+}
