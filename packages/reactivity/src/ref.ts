@@ -41,3 +41,31 @@ function triggerRefValue(ref) {
   const dep = ref.dep;
   if (dep) triggerEffects(dep);
 }
+
+class ObjectRefImpl {
+  public __v_isRef = true; // 增加ref标识
+  constructor(
+    public _object,
+    public _key,
+  ) {}
+  get value() {
+    return this._object[this._key];
+  }
+  set value(newValue) {
+    if (this._object[this._key] === newValue) return;
+    this._object[this._key] = newValue;
+  }
+}
+
+export function toRef(object, key) {
+  return new ObjectRefImpl(object, key);
+}
+
+export function toRefs(object) {
+  const res = {};
+  for (let key in object) {
+    if (!Object.prototype.hasOwnProperty.call(object, key)) continue;
+    res[key] = toRef(object, key);
+  }
+  return res;
+}

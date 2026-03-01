@@ -1,10 +1,10 @@
-import { isObject } from '@wowowo-vue/shared';
-import { reactive } from './reactive';
-import { track, trigger } from './reactiveEffect';
+import { isObject } from "@wowowo-vue/shared";
+import { reactive } from "./reactive";
+import { track, trigger } from "./reactiveEffect";
 
 // 这个用来判断当我们的target是一个reactive的时候(proxy)直接返回target
 export enum ReactiveFlags {
-  IS_REACTIVE = '__v_isReactive'
+  IS_REACTIVE = "__v_isReactive",
 }
 
 export const mutableHandlers: ProxyHandler<any> = {
@@ -35,5 +35,5 @@ export const mutableHandlers: ProxyHandler<any> = {
     // 返回true表示set成功，不然会报错
     // 而Reflect.set自身返回的就是布尔值
     return result;
-  }
+  },
 };
