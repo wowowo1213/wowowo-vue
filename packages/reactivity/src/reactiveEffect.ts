@@ -1,8 +1,8 @@
-import { activeEffect, trackEffect, triggerEffects } from './effect';
+import { activeEffect, trackEffect, triggerEffects } from "./effect";
 
 const targetMap = new WeakMap(); // 存放依赖收集的关系
 
-const createDep = (cleanup: Function, key: String) => {
+export const createDep = (cleanup: Function, key: String) => {
   const dep = new Map() as any;
   // cleanup函数用于清理不需要的属性
   dep.cleanup = cleanup;

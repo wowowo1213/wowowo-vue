@@ -8,8 +8,15 @@
   <body>
     <div id="app">app</div>
     <script type="module">
-      import { ref } from './reactivity.js';
-      const app = document.querySelector('#app');
+      import { ref, reactive, effect } from "./reactivity.js";
+      const app = document.querySelector("#app");
+      // const flag = ref(false);
+      // effect(() => {
+      //   app.innerHTML = flag.value ? "wowowo-true" : "wowowo-false";
+      // });
+      // setTimeout(() => {
+      //   flag.value = true;
+      // }, 1000);
     </script>
   </body>
 </html>

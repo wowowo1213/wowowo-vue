@@ -1,4 +1,4 @@
-// 这个暴露出去给proxy的get函数使用
+// 这个暴露出去给其他模块使用
 export let activeEffect;
 
 function preCleanEffect(effect) {
@@ -35,7 +35,7 @@ class ReactiveEffect {
   // scheduler为fn中依赖的数据发生变化后调用的更新函数，用来更新视图
   constructor(
     public fn,
-    public scheduler
+    public scheduler,
   ) {}
 
   run() {
@@ -46,6 +46,15 @@ class ReactiveEffect {
       activeEffect = this;
       // effect重新执行前，需要将上一次的依赖情况进行清除
       preCleanEffect(this);
+      // 比如下面这个没有running的话会执行两次runner
+      // const state = reactive({
+      //   name: "wowowo",
+      // });
+      // effect(() => {
+      //   console.log("runner");
+      //   app.innerHTML = state.name;
+      //   state.name = "114514";
+      // });
       this._running++;
       return this.fn();
     } finally {
