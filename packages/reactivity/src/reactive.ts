@@ -1,5 +1,6 @@
 import { isObject } from "@wowowo-vue/shared";
-import { ReactiveFlags, mutableHandlers } from "./baseHandler";
+import { mutableHandlers } from "./baseHandler";
+import { ReactiveFlags } from "./constants";
 
 const reactiveMap = new WeakMap();
 

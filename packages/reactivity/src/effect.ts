@@ -1,3 +1,5 @@
+import { DirtyLevels } from "./constants";
+
 export let activeEffect;
 
 function preCleanEffect(effect) {
@@ -19,6 +21,7 @@ class ReactiveEffect {
   _depsLength = 0;
   _running = 0;
   deps = [];
+  _dirtyLevel = DirtyLevels.Dirty; // 脏值
   public active = true;
   constructor(
     public fn,
@@ -26,6 +29,7 @@ class ReactiveEffect {
   ) {}
 
   run() {
+    this._dirtyLevel = DirtyLevels.NoDirty;
     if (!this.active) return this.fn();
     let lastEffect = activeEffect;
     try {
