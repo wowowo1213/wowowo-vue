@@ -16,17 +16,25 @@ function postCleanEffect(effect) {
   }
 }
 
-class ReactiveEffect {
+export class ReactiveEffect {
   _trackId = 0;
   _depsLength = 0;
   _running = 0;
   deps = [];
-  _dirtyLevel = DirtyLevels.Dirty; // 脏值
+  _dirtyLevel = DirtyLevels.Dirty;
   public active = true;
   constructor(
     public fn,
     public scheduler,
   ) {}
+
+  public get dirty() {
+    return this._dirtyLevel === DirtyLevels.Dirty;
+  }
+
+  public set dirty(v) {
+    this._dirtyLevel = v ? DirtyLevels.Dirty : DirtyLevels.NoDirty;
+  }
 
   run() {
     this._dirtyLevel = DirtyLevels.NoDirty;
