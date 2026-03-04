@@ -1,20 +1,28 @@
 import { ReactiveEffect } from "./effect";
+import { trackRefValue, triggerRefValue } from "./ref";
 import { isFunction } from "@wowowo-vue/shared";
 
 class ComputedRefImpl {
   public _value;
   public effect;
+  public dep;
   constructor(
     getter,
     public setter,
   ) {
     this.effect = new ReactiveEffect(
       () => getter(this._value),
-      () => {},
+      () => {
+        triggerRefValue(this);
+      },
     );
   }
   get value() {
-    return this.effect.run();
+    if (this.effect.dirty) {
+      this._value = this.effect.run();
+      trackRefValue(this);
+    }
+    return this._value;
   }
   set value(v) {
     this.setter(v);

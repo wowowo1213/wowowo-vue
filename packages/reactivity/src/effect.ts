@@ -87,7 +87,7 @@ export function trackEffect(effect, dep) {
 
 export function triggerEffects(dep) {
   for (const effect of dep.keys()) {
-    if (!effect.scheduler || effect._running) return;
-    effect.scheduler();
+    if (effect._running) return;
+    effect.scheduler?.();
   }
 }
