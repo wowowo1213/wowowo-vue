@@ -87,7 +87,8 @@ export function trackEffect(effect, dep) {
 
 export function triggerEffects(dep) {
   for (const effect of dep.keys()) {
-    if (effect._running) return;
-    effect.scheduler?.();
+    if (effect._dirtyLevel < DirtyLevels.Dirty)
+      effect._dirtyLevel = DirtyLevels.Dirty;
+    if (!effect._running) effect.scheduler?.();
   }
 }
