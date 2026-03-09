@@ -1,9 +1,22 @@
 import { toReactive } from "./reactive";
 import { activeEffect, trackEffect, triggerEffects } from "./effect";
 import { createDep } from "./reactiveEffect";
+import { ReactiveFlags } from "./constants";
+
+declare const RefSymbol: unique symbol;
+
+export interface Ref<T = any, S = T> {
+  get value(): T;
+  set value(_: S);
+  [RefSymbol]: true;
+}
+
+export function isRef(r: any): r is Ref {
+  return r ? r[ReactiveFlags.IS_REF] === true : false;
+}
 
 class RefImpl {
-  public __v_isRef = true;
+  public readonly [ReactiveFlags.IS_REF] = true;
   public _value;
   public dep;
   constructor(public rawValue) {

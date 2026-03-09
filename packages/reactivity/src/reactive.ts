@@ -2,6 +2,14 @@ import { isObject } from "@wowowo-vue/shared";
 import { mutableHandlers } from "./baseHandler";
 import { ReactiveFlags } from "./constants";
 
+interface Target {
+  [ReactiveFlags.IS_REACTIVE]?: boolean;
+}
+
+export function isReactive(value: unknown): boolean {
+  return value && (value as Target)[ReactiveFlags.IS_REACTIVE];
+}
+
 const reactiveMap = new WeakMap();
 
 function createReactiveObject(target) {
