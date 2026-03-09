@@ -44,6 +44,8 @@ export function watch(
   } else if (isFunction(source)) {
     if (cb) {
       getter = source as () => any;
+    } else {
+      getter = source as () => any;
     }
   }
 
@@ -70,6 +72,10 @@ export function watch(
     if (immediate) job();
     else oldValue = effect.run();
   } else effect.run();
+}
+
+export function watchEffect(source: object | Function, options = {}) {
+  watch(source, null, options);
 }
 
 function traverse(

@@ -12,7 +12,7 @@ export interface Ref<T = any, S = T> {
 }
 
 export function isRef(r: any): r is Ref {
-  return r ? r[ReactiveFlags.IS_REF] === true : false;
+  return r && r[ReactiveFlags.IS_REF];
 }
 
 class RefImpl {
