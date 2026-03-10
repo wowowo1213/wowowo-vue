@@ -46,7 +46,8 @@ export function trackRefValue(ref) {
   if (activeSub)
     trackEffect(
       activeSub,
-      (ref.dep = createDep(() => (ref.dep = undefined), "undefined")),
+      (ref.dep =
+        ref.dep || createDep(() => (ref.dep = undefined), "undefined")),
     );
 }
 
