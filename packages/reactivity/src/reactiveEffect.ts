@@ -1,4 +1,4 @@
-import { activeEffect, trackEffect, triggerEffects } from "./effect";
+import { activeSub, trackEffect, triggerEffects } from "./effect";
 
 const targetMap = new WeakMap();
 
@@ -9,7 +9,7 @@ export const createDep = (cleanup: Function, key: String) => {
 };
 
 export function track(target, key) {
-  if (!activeEffect) return;
+  if (!activeSub) return;
 
   let depsMap = targetMap.get(target);
   if (!depsMap) targetMap.set(target, (depsMap = new Map()));
@@ -17,7 +17,7 @@ export function track(target, key) {
   let dep = depsMap.get(key);
   if (!dep) depsMap.set(key, (dep = createDep(() => depsMap.delete(key), key)));
 
-  trackEffect(activeEffect, dep);
+  trackEffect(activeSub, dep);
 }
 
 export function trigger(target, key, value, oldValue) {

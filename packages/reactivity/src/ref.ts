@@ -1,5 +1,5 @@
 import { toReactive } from "./reactive";
-import { activeEffect, trackEffect, triggerEffects } from "./effect";
+import { activeSub, trackEffect, triggerEffects } from "./effect";
 import { createDep } from "./reactiveEffect";
 import { ReactiveFlags } from "./constants";
 
@@ -43,9 +43,9 @@ function createRef(value) {
 }
 
 export function trackRefValue(ref) {
-  if (activeEffect)
+  if (activeSub)
     trackEffect(
-      activeEffect,
+      activeSub,
       (ref.dep = createDep(() => (ref.dep = undefined), "undefined")),
     );
 }

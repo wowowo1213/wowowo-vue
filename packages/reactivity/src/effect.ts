@@ -1,6 +1,6 @@
 import { DirtyLevels } from "./constants";
 
-export let activeEffect;
+export let activeSub;
 
 function preCleanEffect(effect) {
   effect._depsLength = 0;
@@ -39,16 +39,16 @@ export class ReactiveEffect {
   run() {
     this._dirtyLevel = DirtyLevels.NoDirty;
     if (!this.active) return this.fn();
-    let lastEffect = activeEffect;
+    let lastEffect = activeSub;
     try {
-      activeEffect = this;
+      activeSub = this;
       preCleanEffect(this);
       this._running++;
       return this.fn();
     } finally {
       this._running--;
       postCleanEffect(this);
-      activeEffect = lastEffect;
+      activeSub = lastEffect;
     }
   }
 
