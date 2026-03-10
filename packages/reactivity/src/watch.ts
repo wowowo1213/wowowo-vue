@@ -36,6 +36,7 @@ export function watch(
 
   let effect: ReactiveEffect;
   let getter: () => any;
+  let cleanup: (() => void) | undefined;
 
   if (isRef(source)) {
     getter = () => source.value;
@@ -60,7 +61,8 @@ export function watch(
   const job = () => {
     if (cb) {
       const newValue = effect.run();
-      cb(newValue, oldValue, () => {});
+      if (cleanup) cleanup();
+      cb(newValue, oldValue, onCleanup);
       oldValue = newValue;
     } else {
       effect.run();
@@ -68,10 +70,24 @@ export function watch(
   };
 
   effect = new ReactiveEffect(getter, job);
+
+  const onCleanup = (fn: Function) => {
+    cleanup = () => {
+      fn();
+      cleanup = undefined;
+    };
+  };
+
   if (cb) {
     if (immediate) job();
     else oldValue = effect.run();
   } else effect.run();
+
+  const unwatch = () => {
+    effect.stop();
+  };
+
+  return unwatch;
 }
 
 export function watchEffect(source: object | Function, options = {}) {
