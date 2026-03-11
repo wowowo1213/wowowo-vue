@@ -28,6 +28,15 @@ importers:
         specifier: workspace:*
         version: link:../shared
 
+  packages/runtime-dom:
+    dependencies:
+      '@wowowo-vue/reactivity':
+        specifier: workspace:*
+        version: link:../reactivity
+      '@wowowo-vue/shared':
+        specifier: workspace:*
+        version: link:../shared
+
   packages/shared: {}
 
 packages:
