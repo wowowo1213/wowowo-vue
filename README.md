@@ -6,7 +6,17 @@
 
 ## 目前包含的模块
 
-`reactive`、`effect`、`ref`、`computed`、`watch`
+### `reactivity`
+
+`reactive`、`effect`、`ref`、`toRef/toRefs`、`computed`、`watch/watchEffect`
+
+### `runtime-dom`
+
+`nodeOps`、`patchProp`、`render`
+
+### `runtime-core`
+
+`createRenderer`
 
 ## 运行命令
 
