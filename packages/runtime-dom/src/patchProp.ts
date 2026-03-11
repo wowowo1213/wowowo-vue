@@ -11,6 +11,7 @@ export default function patchProp(
 ) {
   if (key === "class") return patchClass(el, nextValue);
   else if (key === "style") return patchStyle(el, prevValue, nextValue);
-  else if (/^on[A-Z]/.test(key)) return patchEvent(el, key, nextValue);
-  else return patchAttr(el, key, nextValue);
+  else if (/^on[A-Z]/.test(key))
+    return patchEvent(el, key, nextValue as Function | null);
+  else return patchAttr(el, key, nextValue as string | null);
 }

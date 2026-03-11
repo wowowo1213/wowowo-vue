@@ -1,8 +1,8 @@
 export default function patchAttr(
   el: HTMLElement,
   key: string,
-  value: unknown,
+  value: string | null,
 ) {
-  if (value) el.removeAttribute(key);
+  if (value == null) el.removeAttribute(key);
   else if (typeof value === "string") el.setAttribute(key, value);
 }

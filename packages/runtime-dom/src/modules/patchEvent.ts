@@ -7,7 +7,7 @@ function createInvoker(value) {
 export default function patchEvent(
   el: HTMLElement,
   name: string,
-  nextValue: unknown,
+  nextValue: Function | null,
 ) {
   const invokers = el._vei || (el._vei = {});
   const existingInvoker = invokers[name];

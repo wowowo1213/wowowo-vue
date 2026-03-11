@@ -1,8 +1,8 @@
 export const nodeOps = {
-  insert(el: HTMLElement, parent: HTMLElement, ancher: HTMLElement) {
+  insert(el: Node, parent: Node, ancher: Node | null) {
     parent.insertBefore(el, ancher || null);
   },
-  remove(el: HTMLElement) {
+  remove(el: Node) {
     const parent = el.parentNode;
     parent && parent.removeChild(el);
   },
@@ -15,16 +15,16 @@ export const nodeOps = {
   createComment(comment: string) {
     return document.createComment(comment);
   },
-  setText(node: HTMLElement, text: string) {
+  setText(node: Node, text: string) {
     node.nodeValue = text;
   },
-  setElementText(el: HTMLElement, text: string) {
+  setElementText(el: Node, text: string) {
     el.textContent = text;
   },
-  parentNode(node: HTMLElement) {
+  parentNode(node: Node) {
     return node.parentNode;
   },
-  nextSibling(node: HTMLElement) {
+  nextSibling(node: Node) {
     return node.nextSibling;
   },
 };
