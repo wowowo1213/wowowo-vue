@@ -1,17 +1,2 @@
-export const isArray: typeof Array.isArray = Array.isArray;
-export const isMap = (val: unknown): val is Map<any, any> =>
-  toTypeString(val) === "[object Map]";
-export const isSet = (val: unknown): val is Set<any> =>
-  toTypeString(val) === "[object Set]";
-
-export const isFunction = (val: unknown): val is Function =>
-  typeof val === "function";
-export const isObject = (val: unknown): val is Record<any, any> =>
-  val !== null && typeof val === "object";
-
-const objectToString: typeof Object.prototype.toString =
-  Object.prototype.toString;
-const toTypeString = (value: unknown): string => objectToString.call(value);
-
-export const isPlainObject = (val: unknown): val is object =>
-  toTypeString(val) === "[object Object]";
+export * from "./general";
+export * from "./shapeFlags";

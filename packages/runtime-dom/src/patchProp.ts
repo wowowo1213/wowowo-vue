@@ -6,8 +6,8 @@ import patchAttr from "./modules/patchAttr";
 export default function patchProp(
   el: HTMLElement,
   key: string,
-  prevValue: unknown,
-  nextValue: unknown,
+  prevValue?: unknown,
+  nextValue?: unknown,
 ) {
   if (key === "class") return patchClass(el, nextValue);
   else if (key === "style") return patchStyle(el, prevValue, nextValue);

@@ -1,7 +1,10 @@
 import { nodeOps } from "./nodeOps";
 import patchProp from "./patchProp";
+import { createRenderer } from "@wowowo-vue/runtime-core";
 
 const renderOptions = Object.assign({ patchProp }, nodeOps);
+export const render = (vnode: object, container: Node) => {
+  return createRenderer(renderOptions).render(vnode, container);
+};
 
-export { renderOptions };
-export * from "@wowowo-vue/reactivity";
+export * from "@wowowo-vue/runtime-core";
