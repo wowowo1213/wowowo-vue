@@ -16,7 +16,7 @@
 
 ### `runtime-core`
 
-`createRenderer`
+`createRenderer`、`h`、`createVnode`
 
 ## 运行命令
 
