@@ -1,19 +1,19 @@
-import { isObject } from "@wowowo-vue/shared";
-
 export default function patchStyle(
   el: HTMLElement,
-  prevValue: unknown,
-  nextValue: unknown,
+  prevValue: any,
+  nextValue: any,
 ) {
-  if (isObject(nextValue)) {
-    const style = el.style;
+  const style = el.style;
+  if (nextValue) {
     for (const key in nextValue) {
       style[key] = nextValue[key];
     }
-    if (isObject(prevValue)) {
+    if (prevValue) {
       for (const key in prevValue) {
         if (nextValue[key] == null) style[key] = null;
       }
     }
+  } else {
+    el.removeAttribute("style");
   }
 }

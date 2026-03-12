@@ -42,7 +42,7 @@ export function createRenderer(renderOptions) {
 
   function processElement(n1, n2, container) {
     if (n1 === null) mountElement(n2, container);
-    else patchElement(n1, n2, container);
+    else patchElement(n1, n2);
   }
 
   function mountElement(vnode, container) {
@@ -61,18 +61,18 @@ export function createRenderer(renderOptions) {
     hostInsert(el, container);
   }
 
-  function mountChildren(children: Array<unknown>, container: Node) {
+  function mountChildren(children: Array<unknown>, el: Node) {
     for (let i = 0; i < children.length; i++) {
-      patch(null, children[i], container);
+      patch(null, children[i], el);
     }
   }
 
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2) {
     const el = (n2.el = n1.el);
     const oldProps = n1.props || {};
     const newProps = n2.props || {};
     patchProps(oldProps, newProps, el);
-    patchChildren(n1, n2, container);
+    patchChildren(n1, n2, el);
   }
 
   function patchProps(oldProps, newProps, el) {
@@ -86,7 +86,40 @@ export function createRenderer(renderOptions) {
     }
   }
 
-  function patchChildren(n1, n2, container) {}
+  function patchChildren(n1, n2, el) {
+    const c1 = n1.children;
+    const c2 = n2.children;
+    const prevShapeFlag = n1.shapeFlag;
+    const shapeFlag = n2.shapeFlag;
+
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        unmountChildren(c1);
+      }
+      if (c1 !== c2) {
+        hostSetElementText(el, c2);
+      }
+    } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+      } else {
+        if (c1) hostSetElementText(el, "");
+        mountChildren(c2, el);
+      }
+    } else {
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        unmountChildren(c1);
+      } else if (c1) {
+        hostSetElementText(el, "");
+      }
+    }
+  }
+
+  function unmountChildren(children) {
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      unmount(child);
+    }
+  }
 
   return {
     render,
