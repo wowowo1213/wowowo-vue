@@ -101,6 +101,7 @@ export function createRenderer(renderOptions) {
       }
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        patchKeyedChildren(c1, c2, el);
       } else {
         if (c1) hostSetElementText(el, "");
         mountChildren(c2, el);
@@ -118,6 +119,35 @@ export function createRenderer(renderOptions) {
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       unmount(child);
+    }
+  }
+
+  function patchKeyedChildren(c1, c2, el) {
+    let i = 0;
+    let e1 = c1.length - 1;
+    let e2 = c2.length - 1;
+
+    while (i <= e1 && i <= e2) {
+      const n1 = c1[i];
+      const n2 = c2[i];
+      if (isSameVNodeType(n1, n2)) {
+        patch(n1, n2, el);
+      } else {
+        break;
+      }
+      i++;
+    }
+
+    while (i <= e1 && i <= e2) {
+      const n1 = c1[e1];
+      const n2 = c2[e2];
+      if (isSameVNodeType(n1, n2)) {
+        patch(n1, n2, el);
+      } else {
+        break;
+      }
+      e1--;
+      e2--;
     }
   }
 

@@ -5,7 +5,7 @@ function createInvoker(value) {
 }
 
 export default function patchEvent(
-  el: HTMLElement,
+  el: any,
   name: string,
   nextValue: Function | null,
 ) {
