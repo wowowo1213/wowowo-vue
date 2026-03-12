@@ -1,4 +1,5 @@
 import { ShapeFlags } from "@wowowo-vue/shared";
+import { isSameVNodeType } from "./createVnode";
 
 export function createRenderer(renderOptions) {
   const {
@@ -15,18 +16,38 @@ export function createRenderer(renderOptions) {
   } = renderOptions;
 
   function render(vnode, container) {
+    if (vnode == null) {
+      if (container._vnode) {
+        unmount(container._vnode);
+      }
+    }
     patch(container._vnode || null, vnode, container);
     container._vnode = vnode;
   }
 
+  function unmount(vnode) {
+    hostRemove(vnode.el);
+  }
+
   function patch(n1, n2, container) {
     if (n1 == n2) return;
+
+    if (n1 && !isSameVNodeType(n1, n2)) {
+      unmount(n1);
+      n1 = null;
+    }
+
+    processElement(n1, n2, container);
+  }
+
+  function processElement(n1, n2, container) {
     if (n1 === null) mountElement(n2, container);
+    else patchElement(n1, n2, container);
   }
 
   function mountElement(vnode, container) {
     const { type, children, props, shapeFlag } = vnode;
-    const el = hostCreateElement(type);
+    const el = (vnode.el = hostCreateElement(type));
 
     if (props) {
       for (const key in props) {
@@ -45,6 +66,27 @@ export function createRenderer(renderOptions) {
       patch(null, children[i], container);
     }
   }
+
+  function patchElement(n1, n2, container) {
+    const el = (n2.el = n1.el);
+    const oldProps = n1.props || {};
+    const newProps = n2.props || {};
+    patchProps(oldProps, newProps, el);
+    patchChildren(n1, n2, container);
+  }
+
+  function patchProps(oldProps, newProps, el) {
+    for (const key in newProps) {
+      hostPatchProp(el, key, oldProps[key], newProps[key]);
+    }
+    for (const key in oldProps) {
+      if (!(key in newProps)) {
+        hostPatchProp(el, key, oldProps[key], null);
+      }
+    }
+  }
+
+  function patchChildren(n1, n2, container) {}
 
   return {
     render,

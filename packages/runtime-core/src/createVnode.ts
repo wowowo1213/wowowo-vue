@@ -4,6 +4,10 @@ export function isVNode(value: any) {
   return value ? value.__v_isVNode === true : false;
 }
 
+export function isSameVNodeType(n1, n2) {
+  return n1.type === n2.type && n1.key === n2.key;
+}
+
 export function createVnode(
   type: string | null,
   props?,
