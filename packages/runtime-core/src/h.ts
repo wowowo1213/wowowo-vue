@@ -12,13 +12,13 @@ export function h(type, propsOrChildren?, children?) {
       }
     }
 
-    createVnode(type, null, propsOrChildren);
+    return createVnode(type, null, propsOrChildren);
   } else {
     if (l > 3) {
       children = Array.from(arguments).slice(2);
     } else if (l === 3 && isVNode(children)) {
       children = [children];
     }
-    createVnode(type, propsOrChildren, children);
+    return createVnode(type, propsOrChildren, children);
   }
 }

@@ -25,7 +25,7 @@ export function createRenderer(renderOptions) {
   }
 
   function mountElement(vnode, container) {
-    const { type, children, props, shapeFlags } = vnode;
+    const { type, children, props, shapeFlag } = vnode;
     const el = hostCreateElement(type);
 
     if (props) {
@@ -34,9 +34,8 @@ export function createRenderer(renderOptions) {
       }
     }
 
-    if (shapeFlags & ShapeFlags.TEXT_CHILDREN) hostSetElementText(el, children);
-    else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN)
-      mountChildren(children, el);
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) hostSetElementText(el, children);
+    else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) mountChildren(children, el);
 
     hostInsert(el, container);
   }
