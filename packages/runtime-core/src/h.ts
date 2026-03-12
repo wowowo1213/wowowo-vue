@@ -1,25 +1,24 @@
-import { isString, ShapeFlags } from "@wowowo-vue/shared";
+import { isArray, isObject } from "@wowowo-vue/shared";
+import { createVnode, isVNode } from "./createVnode";
 
-export function h(type, propsOrChildren?, children?) {}
-
-function createVnode(type: string | null, props, children) {
-  const shapeFlag = isString(type) ? ShapeFlags.ELEMENT : 0;
-  const vnode = {
-    __v_isVnode: true,
-    type,
-    props,
-    children,
-    key: props?.key,
-    el: null,
-    shapeFlag,
-  };
-
-  if (children) {
-    if (Array.isArray(children)) {
-      vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
-    } else {
+export function h(type, propsOrChildren?, children?) {
+  const l = arguments.length;
+  if (l === 2) {
+    if (isObject(propsOrChildren) && !isArray(propsOrChildren)) {
+      if (isVNode(propsOrChildren)) {
+        return createVnode(type, null, [propsOrChildren]);
+      } else {
+        return createVnode(type, propsOrChildren, null);
+      }
     }
-  }
 
-  return vnode;
+    createVnode(type, null, propsOrChildren);
+  } else {
+    if (l > 3) {
+      children = Array.from(arguments).slice(2);
+    } else if (l === 3 && isVNode(children)) {
+      children = [children];
+    }
+    createVnode(type, propsOrChildren, children);
+  }
 }
