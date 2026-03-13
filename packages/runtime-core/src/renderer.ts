@@ -1,5 +1,6 @@
 import { ShapeFlags } from "@wowowo-vue/shared";
 import { isSameVNodeType } from "./createVnode";
+import getSequence from "./seq";
 
 export function createRenderer(renderOptions) {
   const {
@@ -167,6 +168,8 @@ export function createRenderer(renderOptions) {
     let s1 = i;
     let s2 = i;
     const keyToNewIndexMap = new Map();
+    const toBePatched = e2 - s2 + 1;
+    const newIndexToOldMapIndex = new Array(toBePatched).fill(0);
 
     for (let i = s2; i <= e2; i++) {
       const vnode = c2[i];
@@ -178,11 +181,13 @@ export function createRenderer(renderOptions) {
       if (newIndex === undefined) {
         unmount(vnode);
       } else {
+        newIndexToOldMapIndex[newIndex - s2] = i + 1;
         patch(vnode, c2[newIndex], el);
       }
     }
 
-    const toBePatched = e2 - s2 + 1;
+    let increasingSeq = getSequence(newIndexToOldMapIndex);
+    let j = increasingSeq.length - 1;
     for (let i = toBePatched - 1; i >= 0; i--) {
       const newIndex = s2 + i;
       const anchor = c2[newIndex + 1]?.el;
@@ -190,7 +195,8 @@ export function createRenderer(renderOptions) {
       if (!vnode.el) {
         patch(null, vnode, el, anchor);
       } else {
-        hostInsert(vnode.el, el, anchor);
+        if (i === increasingSeq[j]) j--;
+        else hostInsert(vnode.el, el, anchor);
       }
     }
   }
