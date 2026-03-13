@@ -29,7 +29,7 @@ export function createRenderer(renderOptions) {
     hostRemove(vnode.el);
   }
 
-  function patch(n1, n2, container) {
+  function patch(n1, n2, container, anchor = null) {
     if (n1 == n2) return;
 
     if (n1 && !isSameVNodeType(n1, n2)) {
@@ -37,15 +37,15 @@ export function createRenderer(renderOptions) {
       n1 = null;
     }
 
-    processElement(n1, n2, container);
+    processElement(n1, n2, container, anchor);
   }
 
-  function processElement(n1, n2, container) {
-    if (n1 === null) mountElement(n2, container);
+  function processElement(n1, n2, container, anchor) {
+    if (n1 === null) mountElement(n2, container, anchor);
     else patchElement(n1, n2);
   }
 
-  function mountElement(vnode, container) {
+  function mountElement(vnode, container, anchor) {
     const { type, children, props, shapeFlag } = vnode;
     const el = (vnode.el = hostCreateElement(type));
 
@@ -58,7 +58,7 @@ export function createRenderer(renderOptions) {
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) hostSetElementText(el, children);
     else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) mountChildren(children, el);
 
-    hostInsert(el, container);
+    hostInsert(el, container, anchor);
   }
 
   function mountChildren(children: Array<unknown>, el: Node) {
@@ -148,6 +148,50 @@ export function createRenderer(renderOptions) {
       }
       e1--;
       e2--;
+    }
+
+    if (i > e1 && i <= e2) {
+      const nextPos = e2 + 1;
+      const anchor = c2[nextPos]?.el;
+      while (i <= e2) {
+        patch(null, c2[i], el, anchor);
+        i++;
+      }
+    } else if (i > e2 && i <= e1) {
+      while (i <= e1) {
+        unmount(c1[i]);
+        i++;
+      }
+    }
+
+    let s1 = i;
+    let s2 = i;
+    const keyToNewIndexMap = new Map();
+
+    for (let i = s2; i <= e2; i++) {
+      const vnode = c2[i];
+      keyToNewIndexMap.set(vnode.key, i);
+    }
+    for (let i = s1; i <= e1; i++) {
+      const vnode = c1[i];
+      const newIndex = keyToNewIndexMap.get(vnode.key);
+      if (newIndex === undefined) {
+        unmount(vnode);
+      } else {
+        patch(vnode, c2[newIndex], el);
+      }
+    }
+
+    const toBePatched = e2 - s2 + 1;
+    for (let i = toBePatched - 1; i >= 0; i--) {
+      const newIndex = s2 + i;
+      const anchor = c2[newIndex + 1]?.el;
+      const vnode = c2[newIndex];
+      if (!vnode.el) {
+        patch(null, vnode, el, anchor);
+      } else {
+        hostInsert(vnode.el, el, anchor);
+      }
     }
   }
 
