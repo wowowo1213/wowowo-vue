@@ -1,6 +1,7 @@
 import { ShapeFlags } from "@wowowo-vue/shared";
 import { isSameVNodeType, Text, Fragment } from "./createVnode";
 import getSequence from "./seq";
+import { reactive, ReactiveEffect } from "@wowowo-vue/reactivity";
 
 export function createRenderer(renderOptions) {
   const {
@@ -39,10 +40,16 @@ export function createRenderer(renderOptions) {
       n1 = null;
     }
 
-    const { type } = n2;
+    const { type, shapeFlag } = n2;
     if (type === Text) processText(n1, n2, container);
     if (type === Fragment) processFragment(n1, n2, container);
-    else processElement(n1, n2, container, anchor);
+    else {
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        processElement(n1, n2, container, anchor);
+      } else if (shapeFlag & ShapeFlags.COMPONENT) {
+        processComponent(n1, n2, container, anchor);
+      }
+    }
   }
 
   function processText(n1, n2, container) {
@@ -63,6 +70,40 @@ export function createRenderer(renderOptions) {
     } else {
       patchChildren(n1, n2, container);
     }
+  }
+
+  function processComponent(n1, n2, container, anchor) {
+    if (n1 == null) {
+      mountComponent(n2, container, anchor);
+    } else {
+    }
+  }
+
+  function mountComponent(n2, container, anchor) {
+    const { data = () => {}, render } = n2.type;
+    const state = reactive(data());
+    const instance = {
+      state,
+      vnode: n2,
+      subTree: null,
+      isMounted: false,
+      update: null,
+    };
+    const componentUpdateFn = () => {
+      if (!instance.isMounted) {
+        const subTree = render.call(state, state);
+        patch(null, subTree, container, anchor);
+        instance.isMounted = true;
+        instance.subTree = subTree;
+      } else {
+        const subTree = render.call(state, state);
+        patch(instance.subTree, subTree, container, anchor);
+        instance.subTree = subTree;
+      }
+    };
+    const effect = new ReactiveEffect(componentUpdateFn, () => update());
+    const update = (instance.update = () => effect.run());
+    update();
   }
 
   function processElement(n1, n2, container, anchor) {

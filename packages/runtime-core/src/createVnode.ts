@@ -1,4 +1,4 @@
-import { isString, ShapeFlags } from "@wowowo-vue/shared";
+import { isObject, isString, ShapeFlags } from "@wowowo-vue/shared";
 
 export const Text = Symbol("text");
 export const Fragment = Symbol("Fragment");
@@ -16,7 +16,11 @@ export function createVnode(
   props?,
   children?: string | object | null,
 ) {
-  const shapeFlag = isString(type) ? ShapeFlags.ELEMENT : 0;
+  const shapeFlag = isString(type)
+    ? ShapeFlags.ELEMENT
+    : isObject(type)
+      ? ShapeFlags.STATEFUL_COMPONENT
+      : 0;
   const vnode = {
     __v_isVnode: true,
     type,
