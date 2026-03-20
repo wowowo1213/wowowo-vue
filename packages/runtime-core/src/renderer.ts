@@ -1,5 +1,5 @@
 import { ShapeFlags } from "@wowowo-vue/shared";
-import { isSameVNodeType, Text } from "./createVnode";
+import { isSameVNodeType, Text, Fragment } from "./createVnode";
 import getSequence from "./seq";
 
 export function createRenderer(renderOptions) {
@@ -27,7 +27,8 @@ export function createRenderer(renderOptions) {
   }
 
   function unmount(vnode) {
-    hostRemove(vnode.el);
+    if (vnode.type === Fragment) unmountChildren(vnode.children);
+    else hostRemove(vnode.el);
   }
 
   function patch(n1, n2, container, anchor = null) {
@@ -40,6 +41,7 @@ export function createRenderer(renderOptions) {
 
     const { type } = n2;
     if (type === Text) processText(n1, n2, container);
+    if (type === Fragment) processFragment(n1, n2, container);
     else processElement(n1, n2, container, anchor);
   }
 
@@ -52,6 +54,14 @@ export function createRenderer(renderOptions) {
       if (n1.children !== n2.children) {
         hostSetText(el, n2.children);
       }
+    }
+  }
+
+  function processFragment(n1, n2, container) {
+    if (n1 == null) {
+      mountChildren(n2.children, container);
+    } else {
+      patchChildren(n1, n2, container);
     }
   }
 
