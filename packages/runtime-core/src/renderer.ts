@@ -2,6 +2,7 @@ import { ShapeFlags } from "@wowowo-vue/shared";
 import { isSameVNodeType, Text, Fragment } from "./createVnode";
 import getSequence from "./seq";
 import { reactive, ReactiveEffect } from "@wowowo-vue/reactivity";
+import { queueJob } from "./scheduler";
 
 export function createRenderer(renderOptions) {
   const {
@@ -101,7 +102,9 @@ export function createRenderer(renderOptions) {
         instance.subTree = subTree;
       }
     };
-    const effect = new ReactiveEffect(componentUpdateFn, () => update());
+    const effect = new ReactiveEffect(componentUpdateFn, () =>
+      queueJob(update),
+    );
     const update = (instance.update = () => effect.run());
     update();
   }
