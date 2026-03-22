@@ -28,6 +28,7 @@ export function createVnode(
     children,
     key: props?.key,
     el: null,
+    component: null,
     shapeFlag,
   };
 
