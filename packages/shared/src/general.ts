@@ -1,3 +1,7 @@
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+export const hasOwn = (val: object, key: string | symbol) =>
+  hasOwnProperty.call(val, key);
+
 export const isArray: typeof Array.isArray = Array.isArray;
 export const isMap = (val: unknown): val is Map<any, any> =>
   toTypeString(val) === "[object Map]";

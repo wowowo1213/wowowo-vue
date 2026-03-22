@@ -1,4 +1,4 @@
-import { ShapeFlags } from "@wowowo-vue/shared";
+import { hasOwn, ShapeFlags } from "@wowowo-vue/shared";
 import { isSameVNodeType, Text, Fragment } from "./createVnode";
 import getSequence from "./seq";
 import { reactive, ReactiveEffect } from "@wowowo-vue/reactivity";
@@ -80,24 +80,59 @@ export function createRenderer(renderOptions) {
     }
   }
 
-  function mountComponent(n2, container, anchor) {
-    const { data = () => {}, render } = n2.type;
+  function mountComponent(vnode, container, anchor) {
+    const { data = () => {}, props: propsOption = {}, render } = vnode.type;
     const state = reactive(data());
     const instance = {
       state,
-      vnode: n2,
+      vnode,
       subTree: null,
       isMounted: false,
       update: null,
+      component: null,
+      propsOption,
+      props: {},
+      attrs: {},
+      proxy: null,
     };
+    vnode.component = instance;
+    initProps(instance, vnode.props);
+    const publicProperty = {
+      $attrs: (instance) => instance.attrs,
+    };
+    instance.proxy = new Proxy(instance, {
+      get(target, key) {
+        const { state, props } = target;
+        if (state && hasOwn(state, key)) {
+          return state[key];
+        } else if (props && hasOwn(props, key)) {
+          return props[key];
+        }
+        const getter = publicProperty[key];
+        if (getter) {
+          return getter(instance);
+        }
+      },
+      set(target, key, value) {
+        const { state, props } = target;
+        if (state && hasOwn(state, key)) {
+          state[key] = value;
+        } else if (props && hasOwn(props, key)) {
+          console.error("props are readonly");
+          return false;
+        }
+        return true;
+      },
+    });
+
     const componentUpdateFn = () => {
       if (!instance.isMounted) {
-        const subTree = render.call(state, state);
+        const subTree = render.call(instance.proxy, instance.proxy);
         patch(null, subTree, container, anchor);
         instance.isMounted = true;
         instance.subTree = subTree;
       } else {
-        const subTree = render.call(state, state);
+        const subTree = render.call(instance.proxy, instance.proxy);
         patch(instance.subTree, subTree, container, anchor);
         instance.subTree = subTree;
       }
@@ -107,6 +142,24 @@ export function createRenderer(renderOptions) {
     );
     const update = (instance.update = () => effect.run());
     update();
+  }
+
+  function initProps(instance, rawProps) {
+    const props = {};
+    const attrs = {};
+    const propsOption = instance.propsOption || {};
+    if (rawProps) {
+      for (const key in rawProps) {
+        const value = rawProps[key];
+        if (key in propsOption) {
+          props[key] = value;
+        } else {
+          attrs[key] = value;
+        }
+      }
+    }
+    instance.props = reactive(props);
+    instance.attrs = attrs;
   }
 
   function processElement(n1, n2, container, anchor) {
