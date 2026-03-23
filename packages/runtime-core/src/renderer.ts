@@ -97,6 +97,11 @@ export function createRenderer(renderOptions) {
         instance.isMounted = true;
         instance.subTree = subTree;
       } else {
+        const { next } = instance;
+        if (next) {
+          updateComponentPreRender(instance, next);
+        }
+
         const subTree = render.call(instance.proxy, instance.proxy);
         patch(instance.subTree, subTree, container, anchor);
         instance.subTree = subTree;
@@ -111,9 +116,24 @@ export function createRenderer(renderOptions) {
 
   function updateComponent(n1, n2) {
     const instance = (n2.component = n1.component);
-    const { props: prevProps } = n1;
-    const { props: nextProps } = n2;
-    updateProps(instance, prevProps, nextProps);
+    if (shouldComponentUpdate(n1, n2)) {
+      instance.next = n2;
+      instance.update();
+    }
+  }
+
+  function shouldComponentUpdate(n1, n2) {
+    const { props: prevProps, children: prevChildren } = n1;
+    const { props: nextProps, children: nextChildren } = n2;
+    if (prevChildren || nextChildren) return true;
+    if (prevProps === nextProps) return false;
+    return hasPropsChange(prevProps, nextProps);
+  }
+
+  function updateComponentPreRender(instance, next) {
+    instance.next = null;
+    instance.vnode = next;
+    updateProps(instance, instance.props, next.props);
   }
 
   function updateProps(instance, prevProps, nextProps) {

@@ -9,11 +9,11 @@ export function createInstance(vnode) {
     subTree: null,
     isMounted: false,
     update: null,
-    component: null,
     propsOption: vnode.type.props,
     props: {},
     attrs: {},
     proxy: null,
+    next: null,
   };
   return instance;
 }
