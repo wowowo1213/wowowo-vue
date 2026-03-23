@@ -1,4 +1,4 @@
-import { hasOwn, isFunction } from "@wowowo-vue/shared";
+import { hasOwn, isFunction, ShapeFlags } from "@wowowo-vue/shared";
 import { reactive, proxyRefs } from "@wowowo-vue/reactivity";
 
 export function createInstance(vnode) {
@@ -12,6 +12,7 @@ export function createInstance(vnode) {
     propsOption: vnode.type.props,
     props: {},
     attrs: {},
+    slots: {},
     proxy: null,
     next: null,
     setupState: null,
@@ -37,8 +38,15 @@ function initProps(instance, rawProps) {
   instance.attrs = attrs;
 }
 
+function initSlots(instance, children) {
+  if (instance.vnode.shapeFlag & ShapeFlags.SLOTS_CHILDREN) {
+    instance.slots = children;
+  }
+}
+
 const publicProperty = {
   $attrs: (instance) => instance.attrs,
+  $slots: (instance) => instance.slots,
 };
 
 const handler = {
@@ -73,6 +81,7 @@ const handler = {
 export function setupComponent(instance) {
   const { vnode } = instance;
   initProps(instance, vnode.props);
+  initSlots(instance, vnode.children);
   instance.proxy = new Proxy(instance, handler);
   let { data, render, setup } = vnode.type;
   if (setup) {
@@ -82,7 +91,6 @@ export function setupComponent(instance) {
       instance.render = setupResult;
     } else {
       instance.setupState = proxyRefs(setupResult);
-      instance.render = render;
     }
   }
   if (!isFunction(data)) {
@@ -90,4 +98,5 @@ export function setupComponent(instance) {
     data = () => {};
   }
   instance.data = reactive(data.call(instance.proxy));
+  if (!instance.render) instance.render = render;
 }

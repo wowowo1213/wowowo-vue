@@ -19,7 +19,7 @@ function postCleanEffect(effect) {
 export class ReactiveEffect {
   _trackId = 0;
   _depsLength = 0;
-  _running = 0;
+  _running = false;
   deps = [];
   _dirtyLevel = DirtyLevels.Dirty;
   public active = true;
@@ -43,10 +43,10 @@ export class ReactiveEffect {
     try {
       activeSub = this;
       preCleanEffect(this);
-      this._running++;
+      this._running = true;
       return this.fn();
     } finally {
-      this._running--;
+      this._running = false;
       postCleanEffect(this);
       activeSub = lastEffect;
     }
