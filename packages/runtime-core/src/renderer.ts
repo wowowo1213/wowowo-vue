@@ -78,6 +78,7 @@ export function createRenderer(renderOptions) {
     if (n1 == null) {
       mountComponent(n2, container, anchor);
     } else {
+      updateComponent(n1, n2);
     }
   }
 
@@ -106,6 +107,34 @@ export function createRenderer(renderOptions) {
     );
     const update = (instance.update = () => effect.run());
     update();
+  }
+
+  function updateComponent(n1, n2) {
+    const instance = (n2.component = n1.component);
+    const { props: prevProps } = n1;
+    const { props: nextProps } = n2;
+    updateProps(instance, prevProps, nextProps);
+  }
+
+  function updateProps(instance, prevProps, nextProps) {
+    if (hasPropsChange(prevProps, nextProps)) {
+      for (const key in nextProps) {
+        instance.props[key] = nextProps[key];
+      }
+      for (const key in instance.props) {
+        if (!(key in nextProps)) delete instance.props[key];
+      }
+    }
+  }
+
+  function hasPropsChange(prevProps, nextProps) {
+    const key1 = Object.keys(prevProps);
+    const key2 = Object.keys(nextProps);
+    if (key1.length !== key2.length) return true;
+    for (const key of key2) {
+      if (prevProps[key] !== nextProps[key]) return true;
+    }
+    return false;
   }
 
   function processElement(n1, n2, container, anchor) {

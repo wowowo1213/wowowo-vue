@@ -69,8 +69,11 @@ export function setupComponent(instance) {
   const { vnode } = instance;
   initProps(instance, vnode.props);
   instance.proxy = new Proxy(instance, handler);
-  const { data, render } = vnode.type;
-  if (!isFunction(data)) return console.warn("data must be a function");
+  let { data, render } = vnode.type;
+  if (!isFunction(data)) {
+    console.warn("data must be a function");
+    data = () => {};
+  }
   instance.data = reactive(data.call(instance.proxy));
   instance.render = render;
 }
