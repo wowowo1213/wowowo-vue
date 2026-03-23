@@ -1,5 +1,5 @@
 import { hasOwn, isFunction } from "@wowowo-vue/shared";
-import { reactive } from "@wowowo-vue/reactivity";
+import { reactive, proxyRefs } from "@wowowo-vue/reactivity";
 
 export function createInstance(vnode) {
   const instance = {
@@ -14,6 +14,7 @@ export function createInstance(vnode) {
     attrs: {},
     proxy: null,
     next: null,
+    setupState: null,
   };
   return instance;
 }
@@ -42,11 +43,13 @@ const publicProperty = {
 
 const handler = {
   get(target, key) {
-    const { data, props } = target;
+    const { data, props, setupState } = target;
     if (data && hasOwn(data, key)) {
       return data[key];
     } else if (props && hasOwn(props, key)) {
       return props[key];
+    } else if (setupState && hasOwn(setupState, key)) {
+      return setupState[key];
     }
     const getter = publicProperty[key];
     if (getter) {
@@ -54,12 +57,14 @@ const handler = {
     }
   },
   set(target, key, value) {
-    const { data, props } = target;
+    const { data, props, setupState } = target;
     if (data && hasOwn(data, key)) {
       data[key] = value;
     } else if (props && hasOwn(props, key)) {
       console.error("props are readonly");
       return false;
+    } else if (setupState && hasOwn(setupState, key)) {
+      setupState[key] = value;
     }
     return true;
   },
@@ -69,11 +74,20 @@ export function setupComponent(instance) {
   const { vnode } = instance;
   initProps(instance, vnode.props);
   instance.proxy = new Proxy(instance, handler);
-  let { data, render } = vnode.type;
+  let { data, render, setup } = vnode.type;
+  if (setup) {
+    const setupContext = {};
+    const setupResult = setup(instance.props, setupContext);
+    if (isFunction(setupResult)) {
+      instance.render = setupResult;
+    } else {
+      instance.setupState = proxyRefs(setupResult);
+      instance.render = render;
+    }
+  }
   if (!isFunction(data)) {
     console.warn("data must be a function");
     data = () => {};
   }
   instance.data = reactive(data.call(instance.proxy));
-  instance.render = render;
 }
