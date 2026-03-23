@@ -13,6 +13,7 @@ export function createInstance(vnode) {
     props: {},
     attrs: {},
     slots: {},
+    exposed: null,
     proxy: null,
     next: null,
     setupState: null,
@@ -85,7 +86,18 @@ export function setupComponent(instance) {
   instance.proxy = new Proxy(instance, handler);
   let { data, render, setup } = vnode.type;
   if (setup) {
-    const setupContext = {};
+    const setupContext = {
+      slots: instance.slots,
+      attrs: instance.attrs,
+      emit(event, ...payload) {
+        const eventName = `on${event[0].toUpperCase() + event.slice(1)}`;
+        const handler = instance.vnode.props[eventName];
+        handler && handler(...payload);
+      },
+      expose(value) {
+        instance.exposed = value;
+      },
+    };
     const setupResult = setup(instance.props, setupContext);
     if (isFunction(setupResult)) {
       instance.render = setupResult;

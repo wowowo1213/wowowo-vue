@@ -30,8 +30,11 @@ export function createRenderer(renderOptions) {
   }
 
   function unmount(vnode) {
+    const { shapeFlag } = vnode;
     if (vnode.type === Fragment) unmountChildren(vnode.children);
-    else hostRemove(vnode.el);
+    else if (shapeFlag & ShapeFlags.COMPONENT) {
+      unmount(vnode.component.subTree);
+    } else hostRemove(vnode.el);
   }
 
   function patch(n1, n2, container, anchor = null) {
