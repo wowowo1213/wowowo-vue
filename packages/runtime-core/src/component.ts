@@ -98,7 +98,9 @@ export function setupComponent(instance) {
         instance.exposed = value;
       },
     };
+    setCurrentInstance(instance);
     const setupResult = setup(instance.props, setupContext);
+    unsetCurrentInstance();
     if (isFunction(setupResult)) {
       instance.render = setupResult;
     } else {
@@ -111,4 +113,15 @@ export function setupComponent(instance) {
   }
   instance.data = reactive(data.call(instance.proxy));
   if (!instance.render) instance.render = render;
+}
+
+export let currentInstance = null;
+export function getCurrentInstance() {
+  return currentInstance;
+}
+export function setCurrentInstance(instance) {
+  currentInstance = instance;
+}
+export function unsetCurrentInstance() {
+  currentInstance = null;
 }

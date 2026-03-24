@@ -4,6 +4,7 @@ import getSequence from "./seq";
 import { ReactiveEffect } from "@wowowo-vue/reactivity";
 import { queueJob } from "./scheduler";
 import { createInstance, setupComponent } from "./component";
+import { invokerArray } from "./apiLifecycle";
 
 export function createRenderer(renderOptions) {
   const {
@@ -94,20 +95,37 @@ export function createRenderer(renderOptions) {
   function setupRenderEffect(instance, container, anchor) {
     const { render } = instance;
     const componentUpdateFn = () => {
+      const { bm, m } = instance;
       if (!instance.isMounted) {
+        if (bm) {
+          invokerArray(bm);
+        }
+
         const subTree = render.call(instance.proxy, instance.proxy);
         patch(null, subTree, container, anchor);
         instance.isMounted = true;
         instance.subTree = subTree;
+
+        if (m) {
+          invokerArray(m);
+        }
       } else {
-        const { next } = instance;
+        const { next, bu, u } = instance;
         if (next) {
           updateComponentPreRender(instance, next);
+        }
+
+        if (bu) {
+          invokerArray(bu);
         }
 
         const subTree = render.call(instance.proxy, instance.proxy);
         patch(instance.subTree, subTree, container, anchor);
         instance.subTree = subTree;
+
+        if (u) {
+          invokerArray(u);
+        }
       }
     };
     const effect = new ReactiveEffect(componentUpdateFn, () =>
