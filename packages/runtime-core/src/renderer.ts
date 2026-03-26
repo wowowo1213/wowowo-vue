@@ -1,4 +1,4 @@
-import { ShapeFlags } from "@wowowo-vue/shared";
+import { ShapeFlags, PatchFlags } from "@wowowo-vue/shared";
 import { isSameVNodeType, Text, Fragment } from "./createVnode";
 import getSequence from "./seq";
 import { ReactiveEffect } from "@wowowo-vue/reactivity";
@@ -180,7 +180,7 @@ export function createRenderer(renderOptions) {
 
   function processElement(n1, n2, container, anchor) {
     if (n1 === null) mountElement(n2, container, anchor);
-    else patchElement(n1, n2);
+    else patchElement(n1, n2, anchor);
   }
 
   function mountElement(vnode, container, anchor) {
@@ -205,12 +205,26 @@ export function createRenderer(renderOptions) {
     }
   }
 
-  function patchElement(n1, n2) {
+  function patchElement(n1, n2, anchor) {
     const el = (n2.el = n1.el);
     const oldProps = n1.props || {};
     const newProps = n2.props || {};
-    patchProps(oldProps, newProps, el);
-    patchChildren(n1, n2, el);
+
+    const { patchFlag, dynamicChildren } = n2;
+    if (patchFlag) {
+      if (patchFlag & PatchFlags.TEXT) {
+        if (n1.children !== n2.children) hostSetElementText(el, n2.children);
+      } else if (patchFlag & PatchFlags.STYLE) {
+      }
+    } else {
+      patchProps(oldProps, newProps, el);
+    }
+
+    if (dynamicChildren) {
+      patchBlockChildren(n1, n2, el, anchor);
+    } else {
+      patchChildren(n1, n2, el);
+    }
   }
 
   function patchProps(oldProps, newProps, el) {
@@ -335,6 +349,12 @@ export function createRenderer(renderOptions) {
         if (i === increasingSeq[j]) j--;
         else hostInsert(vnode.el, el, anchor);
       }
+    }
+  }
+
+  function patchBlockChildren(n1, n2, el, anchor) {
+    for (let i = 0; i < n2.dynamicChildren.length; i++) {
+      patch(n1.dynamicChildren[i], n2.dynamicChildren[i], el, anchor);
     }
   }
 
