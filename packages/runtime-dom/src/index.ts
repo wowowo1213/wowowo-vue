@@ -8,3 +8,4 @@ export const render = (vnode: object, container: Node) => {
 };
 
 export * from "@wowowo-vue/runtime-core";
+export * from "@wowowo-vue/reactivity";
